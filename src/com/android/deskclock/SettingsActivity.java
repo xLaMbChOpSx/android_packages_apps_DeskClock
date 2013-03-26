@@ -51,6 +51,8 @@ public class SettingsActivity extends PreferenceActivity
             "alarm_in_silent_mode";
     static final String KEY_SHOW_STATUS_BAR_ICON =
             "show_status_bar_icon";
+    static final String KEY_FORCE_SPEAKER_MODE =
+            "force_speaker_mode";
     static final String KEY_ALARM_SNOOZE =
             "snooze_duration";
     static final String KEY_FLIP_ACTION =
@@ -177,6 +179,9 @@ public class SettingsActivity extends PreferenceActivity
             Preference homeTimeZone = findPreference(KEY_HOME_TZ);
             homeTimeZone.setEnabled(!state);
             notifyHomeTimeZoneChanged();
+        } else if (KEY_FORCE_SPEAKER_MODE.equals(pref.getKey())) {
+            boolean state =((CheckBoxPreference) pref).isChecked();
+            Preference forceSpeakerMode = findPreference(KEY_FORCE_SPEAKER_MODE);
         } else if (KEY_VOLUME_BUTTONS.equals(pref.getKey())) {
             final ListPreference listPref = (ListPreference) pref;
             final int idx = listPref.findIndexOfValue((String) newValue);
@@ -248,6 +253,9 @@ public class SettingsActivity extends PreferenceActivity
         listPref = (ListPreference) findPreference(KEY_SHAKE_ACTION);
         updateActionSummary(listPref, listPref.getValue(), R.string.shake_action_summary);
         listPref.setOnPreferenceChangeListener(this);
+        
+        CheckBoxPreference forceSpeakerMode = (CheckBoxPreference) findPreference(KEY_FORCE_SPEAKER_MODE);
+        forceSpeakerMode.setOnPreferenceChangeListener(this);
 
         CheckBoxPreference hideStatusbarIcon = (CheckBoxPreference) findPreference(KEY_SHOW_STATUS_BAR_ICON);
         hideStatusbarIcon.setOnPreferenceChangeListener(this);

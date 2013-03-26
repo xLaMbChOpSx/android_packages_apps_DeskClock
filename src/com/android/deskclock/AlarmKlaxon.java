@@ -201,10 +201,16 @@ public class AlarmKlaxon extends Service {
             // TODO: Reuse mMediaPlayer instead of creating a new one and/or use
             // RingtoneManager.
             mMediaPlayer = new MediaPlayer();
+            final boolean force_speaker_mode = PreferenceManager.getDefaultSharedPreferences(this)
+                    .getBoolean(SettingsActivity.KEY_FORCE_SPEAKER_MODE,false);
             mMediaPlayer.setOnErrorListener(new OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     Log.e("Error occurred while playing audio.");
+                    if(force_speaker_mode) {
+                		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+                		mAudioManager.setSpeakerphoneOn(false);
+                	}
                     mp.stop();
                     mp.release();
                     mMediaPlayer = null;
@@ -267,8 +273,18 @@ public class AlarmKlaxon extends Service {
         if (useIncreasingVolume) {
             startVolumeIncrease();
         }
-
-        player.setAudioStreamType(AudioManager.STREAM_ALARM);
+        
+        boolean force_speaker_mode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(SettingsActivity.KEY_FORCE_SPEAKER_MODE,false);
+        
+        if(force_speaker_mode) {
+        	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        	player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        	mAudioManager.setSpeakerphoneOn(true);
+        } else {
+        	player.setAudioStreamType(AudioManager.STREAM_ALARM);
+        }
+        
         player.setLooping(true);
         player.prepare();
         player.start();
@@ -295,6 +311,12 @@ public class AlarmKlaxon extends Service {
 
             // Stop audio playing
             if (mMediaPlayer != null) {
+            	boolean force_speaker_mode = PreferenceManager.getDefaultSharedPreferences(this)
+                        .getBoolean(SettingsActivity.KEY_FORCE_SPEAKER_MODE,false);
+            	if(force_speaker_mode) {
+            		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+            		mAudioManager.setSpeakerphoneOn(false);
+            	}
                 mMediaPlayer.stop();
                 mMediaPlayer.release();
                 mMediaPlayer = null;
@@ -332,18 +354,30 @@ public class AlarmKlaxon extends Service {
 
     private void startVolumeIncrease() {
         // save current value
+    	boolean force_speaker_mode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(SettingsActivity.KEY_FORCE_SPEAKER_MODE,false);
         mAlarmVolumeSetting = mAudioManager.getStreamVolume(AudioManager.STREAM_ALARM);
 
         mCurrentVolume = INCVOL_START;
-        mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mCurrentVolume, 0);
+        if(force_speaker_mode) {
+        	mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mCurrentVolume, 0);
+        } else {
+        	mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mCurrentVolume, 0);
+        }
         mHandler.sendEmptyMessageDelayed(INCREASE_VOLUME, INCVOL_DELAY);
     }
 
     private void stopVolumeIncrease() {
+    	boolean force_speaker_mode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(SettingsActivity.KEY_FORCE_SPEAKER_MODE,false);
         mHandler.removeMessages(INCREASE_VOLUME);
         if (mAlarmVolumeSetting >= 0) {
             // reset to default from before
-            mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mAlarmVolumeSetting, 0);
+        	if(force_speaker_mode) {
+            	mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mCurrentVolume, 0);
+            } else {
+            	mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mAlarmVolumeSetting, 0);
+            }
             mAlarmVolumeSetting = -1;
         }
     }

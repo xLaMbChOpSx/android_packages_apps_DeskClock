@@ -180,6 +180,12 @@
 
     <!-- Setting summary for showing/hiding the alarm statusbar icon -->
     <string name="show_status_bar_icon_summary">Show an icon in the status bar when an alarm is set</string>
+    
+    <!-- Setting title for forcing phone speaker mode in alarm -->
+    <string name="force_speaker_mode_title">Force Speaker Mode</string>
+
+    <!-- Setting summary for showing/hiding the alarm statusbar icon -->
+    <string name="force_speaker_mode_summary">Forces the alarm to use the speaker, even if headphones are plugged in</string>
 
     <!-- Setting title for changing the snooze duration. -->
     <string name="snooze_duration_title">Snooze length</string>
